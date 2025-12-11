@@ -1,7 +1,9 @@
+import random
+import time
 from datetime import datetime, timedelta
 from itertools import count
 
-from app.domain.batch_port import BatchPort
+from app.domain.batch_port import BatchPort, ConcurrencyError
 from app.schemas.batches_schema import Batch
 
 
@@ -29,34 +31,45 @@ class BatchRepository(BatchPort):
         self._id_seq = count(3)  # simple auto-incrementing ID generator
 
     def upsert(self, batch: Batch) -> Batch:
+        # Artificial delay to cause concurrency
+        time.sleep(random.random() * 0.1)
+
         if batch.id:
+            batch.update_version()
+            print(f"new batch verision {batch._version}")
             for i, saved in enumerate(self._db):
                 if saved.id == batch.id:
                     # Only update fields provided by the caller
                     partial_update = batch.model_dump(
                         exclude_unset=True, exclude_none=True
                     )
+                    print(f"saved version {saved._version}")
+                    if saved._version >= batch._version:
+                        raise ConcurrencyError()
                     updated = saved.model_copy(update=partial_update)
+                    updated.update_version()
                     self._db[i] = updated
                     return updated
         new_batch = Batch(
             id=next(self._id_seq), **batch.model_dump(exclude={"id"})
         )
         self._db.append(new_batch)
-        return new_batch
+        return new_batch.model_copy()
 
-    def list_all(self) -> list[Batch]:
+    def list_all_available(self) -> list[Batch]:
         return [
-            b
-            for b in self._db
-            if b.volume_liters > 0 and not b.is_expired() and not b._is_deleted
+            batch.model_copy()
+            for batch in self._db
+            if batch.volume_liters > 0
+            and not batch.is_expired()
+            and not batch._is_deleted
         ]
 
     def list_all_between_dates(
         self, min_date: datetime, max_date: datetime
     ) -> list[Batch]:
         return [
-            batch
+            batch.model_copy()
             for batch in self._db
             if min_date
             <= batch.received_at + timedelta(days=batch.shelf_life_days)
@@ -71,10 +84,13 @@ class BatchRepository(BatchPort):
                 and not batch.is_expired()
                 and not batch._is_deleted
             ):
-                return batch
+                return batch.model_copy()
         return None
 
     def soft_delete(self, batch_id: int) -> None:
         for batch in self._db:
             if batch.id == batch_id:
                 batch._is_deleted = True
+
+    def list_all(self) -> list[Batch]:
+        return self._db

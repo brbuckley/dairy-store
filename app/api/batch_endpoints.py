@@ -84,11 +84,16 @@ async def consume(
         "order_id": "ORD-12345"
     }
     """
-    return service.consume(
-        batch_id=id,
-        qty=request.qty,
-        order_id=request.order_id,
-    )
+    try:
+        return service.consume(
+            batch_id=id,
+            qty=request.qty,
+            order_id=request.order_id,
+        )
+    except Exception as error:
+        raise HTTPException(
+            500, f"Batch {id} is locked, try again later"
+        ) from error
 
 
 @router.delete(

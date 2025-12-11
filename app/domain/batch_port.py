@@ -4,11 +4,15 @@ from typing import Protocol
 from app.schemas.batches_schema import Batch
 
 
+class ConcurrencyError(Exception):
+    pass
+
+
 class BatchPort(Protocol):
     def upsert(self, batch: Batch) -> Batch:
         pass
 
-    def list_all(self) -> list[Batch]:
+    def list_all_available(self) -> list[Batch]:
         pass
 
     def list_all_between_dates(
@@ -20,4 +24,7 @@ class BatchPort(Protocol):
         pass
 
     def soft_delete(self, batch_id: int) -> None:
+        pass
+
+    def list_all(self) -> list[Batch]:
         pass

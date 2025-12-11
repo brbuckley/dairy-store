@@ -27,6 +27,7 @@ class Batch(BaseModel):
     )
 
     _is_deleted: bool = PrivateAttr(default=False)
+    _version: int = 1
 
     @field_validator("received_at")
     @classmethod
@@ -42,3 +43,7 @@ class Batch(BaseModel):
         return self.received_at + timedelta(
             days=self.shelf_life_days
         ) < datetime.now(UTC)
+
+    def update_version(self) -> int:
+        self._version = self._version + 1
+        return self._version

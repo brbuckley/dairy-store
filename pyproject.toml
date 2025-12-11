@@ -30,6 +30,7 @@ dependencies = [
   "pytest-asyncio>=1.3.0,<2.0.0",      # asyncio support for pytest :contentReference[oaicite:10]{index=10}
   "pytest-mock>=3.15.1,<4.0.0",        # mocker fixture :contentReference[oaicite:11]{index=11}
   "testcontainers>=4.13.3,<5.0.0",     # dockerized integration tests :contentReference[oaicite:12]{index=12}
+  "locust>=2.42.6,<2.43.0",
 
   # Code quality
   "black>=24.4.1,<25.0.0",             # formatter with 3.12+ support :contentReference[oaicite:13]{index=13}

@@ -58,9 +58,10 @@ async def read_by_id(
     id: int,
     service: BatchServiceDep,
 ) -> Batch:
-    batch = service.read_by_id(id)
-    if batch is None:
-        raise HTTPException(404, f"Batch {id} not found")
+    try:
+        batch = service.read_by_id(id)
+    except Exception as error:
+        raise HTTPException(404, f"Batch {id} not found") from error
     return batch
 
 

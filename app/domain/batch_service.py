@@ -6,6 +6,10 @@ from app.domain.batch_port import BatchPort
 from app.schemas.batches_schema import Batch
 
 
+class ResourceNotFound(Exception):
+    pass
+
+
 class BatchService:
     def __init__(self, port: BatchPort) -> None:
         self._port = port
@@ -16,13 +20,16 @@ class BatchService:
     def list_all(self) -> list[Batch]:
         return self._port.list_all()
 
-    def read_by_id(self, batch_id: int) -> Batch | None:
-        return self._port.read_by_id(batch_id)
+    def read_by_id(self, batch_id: int) -> Batch:
+        batch = self._port.read_by_id(batch_id)
+        if not batch:
+            raise ResourceNotFound()
+        return batch
 
     def consume(
         self, batch_id: int, qty: float, order_id: str | None
     ) -> Batch:
-        batch = self._port.read_by_id(batch_id)
+        batch = self.read_by_id(batch_id)
         new_volume = batch.volume_liters - qty
         if new_volume < 0:
             raise ValueError("Cannot consume more than available volume")

@@ -34,4 +34,5 @@ dependencies = [
   # Code quality
   "black>=24.4.1,<25.0.0",             # formatter with 3.12+ support :contentReference[oaicite:13]{index=13}
   "ruff>=0.14.8,<1.0.0",               # ultra-fast linter/formatter :contentReference[oaicite:14]{index=14}
+  "mypy>=1.19.0,<2.0.0",
 ]

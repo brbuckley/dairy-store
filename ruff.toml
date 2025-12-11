@@ -1,0 +1,50 @@
+line-length = 79          # PEP 8 suggested length
+target-version = "py312"  # Use python 3.12+
+
+
+[lint]
+select = [
+    # More detailed descriptions and other options at https://docs.astral.sh/ruff/rules/
+
+    "F",    # pyflakes               - part of Flake8 (Naming and f-string problems + more)
+    "E",    # pycodestyle errors     - part of Flake8 (Whitespace errors + more)
+    "W",    # pycodestyle warnings   - part of Flake8 (Whitespace style issues)
+    "C901", # mccabe                 - part of Flake8 (High complexity in functions)
+    "I",    # isort                  - import sorting
+    "N",    # pep8-Naming            - enforce PEP 8 naming conventions
+    "UP",   # pyupgrade              - upgrades syntax for newer Python versions
+    "S",    # bandit                 - finds security issues
+    "B",    # bugbear                - finds common bugs/antipatterns
+    "A",    # builtins               - check for variables shadowing builtin names
+    "C4",   # comprehensions         - helps you write better list/set/dict comprehensions
+    "ISC",  # implicit-str-concat    - look for string concat style problems (sometimes introduced by auto formatting)
+    "LOG",  # logging                - enforce logging standards
+    "INP",  # no-pep420              - necessitate __init__.py (no implicit namespace packages)
+    "PIE",  # pie                    - removes unnecessary statements/placeholders
+    "PT",   # pytest-style           - checks for common pytest issues/inconsistencies
+    "RET",  # return                 - checks for problematic return values or flows
+    "SIM",  # simplify               - finds potential code simplification patterns
+    "ERA",  # eradicate              - finds commented out code (bad)
+    "PL",   # pylint                 - lots of linting stuff
+    "TRY",  # tryceratops            - finds error handling antipatterns
+]
+
+ignore = [
+    "D203",   # incompatible with D211 (enforce zero not one blank line before class)
+    "D212",   # incompatible with D213 (multi-line docstring summary should start at the first not second line)
+    "D400",   # undesired extra restriction on top of D415 (Punctuation required in docstring)
+    "ISC001"  # incompatible with formatter
+]
+
+fixable = ["ALL"]  # Fix all auto-resolvable issues when given --fix option
+
+[lint.per-file-ignores]
+"**/tests/*" = [
+    "S101", # Ignore asserts in tests
+    "D",    # Ignore documentation requirements in tests
+]
+
+[format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true  # Also format code included in docstrings

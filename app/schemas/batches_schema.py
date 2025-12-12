@@ -1,6 +1,6 @@
 from datetime import UTC, datetime, timedelta
 
-from pydantic import BaseModel, Field, PrivateAttr, field_validator
+from pydantic import BaseModel, Field, PrivateAttr, field_validator, model_validator
 
 
 class Batch(BaseModel):
@@ -28,6 +28,14 @@ class Batch(BaseModel):
 
     _is_deleted: bool = PrivateAttr(default=False)
     _version: int = 1
+    _expiry: datetime = PrivateAttr() 
+
+    @model_validator(mode="after")
+    def compute_expiry(self):
+        # runs after validation; set private attr based on instance values
+        expiry = self.received_at + timedelta(days=self.shelf_life_days)
+        object.__setattr__(self, "_expiry", expiry)
+        return self
 
     @field_validator("received_at")
     @classmethod
@@ -35,15 +43,14 @@ class Batch(BaseModel):
         # If naive, assume UTC
         if value.tzinfo is None:
             return value.replace(tzinfo=UTC)
-
         # If offset-aware but not UTC, normalize to UTC
         return value.astimezone(UTC)
 
     def is_expired(self) -> bool:
-        return self.received_at + timedelta(
-            days=self.shelf_life_days
-        ) < datetime.now(UTC)
+        return self._expiry < datetime.now(UTC)
 
     def update_version(self) -> int:
         self._version = self._version + 1
         return self._version
+
+    model_config = {"from_attributes": True}

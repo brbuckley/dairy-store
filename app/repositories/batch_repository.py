@@ -1,5 +1,3 @@
-import random
-import time
 from datetime import datetime, timedelta
 from itertools import count
 
@@ -31,25 +29,20 @@ class BatchRepository(BatchPort):
         self._id_seq = count(3)  # simple auto-incrementing ID generator
 
     def upsert(self, batch: Batch) -> Batch:
-        # Artificial delay to cause concurrency
-        time.sleep(random.random() * 0.1)
-
         if batch.id:
             batch.update_version()
-            print(f"new batch verision {batch._version}")
-            for i, saved in enumerate(self._db):
-                if saved.id == batch.id:
+            for i, old_batch in enumerate(self._db):
+                if old_batch.id == batch.id:
                     # Only update fields provided by the caller
                     partial_update = batch.model_dump(
                         exclude_unset=True, exclude_none=True
                     )
-                    print(f"saved version {saved._version}")
-                    if saved._version >= batch._version:
+                    if old_batch._version >= batch._version:
                         raise ConcurrencyError()
-                    updated = saved.model_copy(update=partial_update)
-                    updated.update_version()
-                    self._db[i] = updated
-                    return updated
+                    new_batch = old_batch.model_copy(update=partial_update)
+                    new_batch.update_version()
+                    self._db[i] = new_batch
+                    return new_batch
         new_batch = Batch(
             id=next(self._id_seq), **batch.model_dump(exclude={"id"})
         )
@@ -74,6 +67,8 @@ class BatchRepository(BatchPort):
             if min_date
             <= batch.received_at + timedelta(days=batch.shelf_life_days)
             <= max_date
+            and not batch.is_expired()
+            and not batch._is_deleted
         ]
 
     def read_by_id(self, batch_id: int) -> Batch | None:

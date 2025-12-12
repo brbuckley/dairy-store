@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter
 
 from app.config.dependency_injection import AdminServiceDep

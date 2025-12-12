@@ -14,10 +14,13 @@ dependencies = [
   "sqlalchemy>=2.0.45,<3.0.0",         # latest SQLAlchemy 2.x :contentReference[oaicite:2]{index=2}
   "alembic>=1.17.2,<2.0.0",            # latest Alembic :contentReference[oaicite:3]{index=3}
   "asyncpg>=0.31.0,<1.0.0",            # async Postgres driver :contentReference[oaicite:4]{index=4}
+  "psycopg2",
+  "psycopg2-binary",
 
   # Validation & settings
   "pydantic>=2.12.5,<3.0.0",           # latest Pydantic v2 :contentReference[oaicite:5]{index=5}
   "pydantic-settings>=2.12.0,<3.0.0",  # latest pydantic-settings :contentReference[oaicite:6]{index=6}
+  "email-validator",
 
   # HTTP client (for external calls or tests)
   "httpx>=0.28.1,<0.29.0",             # latest HTTPX :contentReference[oaicite:7]{index=7}

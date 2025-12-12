@@ -22,3 +22,5 @@ class ConsumptionRecord(BaseModel):
 
         # If offset-aware but not UTC, normalize to UTC
         return value.astimezone(UTC)
+
+    model_config = {"from_attributes": True}

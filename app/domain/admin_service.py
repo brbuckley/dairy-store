@@ -1,4 +1,3 @@
-
 from app.domain.batch_port import BatchPort
 from app.domain.record_port import RecordPort
 from app.schemas.batches_schema import Batch

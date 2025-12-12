@@ -10,6 +10,7 @@ from app.domain.batch_port import BatchPort
 from app.domain.batch_service import BatchService
 from app.domain.record_port import RecordPort
 from app.repositories.batch_repository import BatchRepository
+from app.repositories.db_batch_repo import DBBatchRepository
 from app.repositories.record_repository import RecordRepository
 
 
@@ -23,6 +24,8 @@ def get_batch_repo_singleton() -> BatchPort:
     settings = get_settings_cached()
     if settings.env == "dev":
         return BatchRepository()
+    if settings.env == "db":
+        return DBBatchRepository()
     return BatchRepository()
 
 

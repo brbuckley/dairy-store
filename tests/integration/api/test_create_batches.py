@@ -1,4 +1,6 @@
 from datetime import UTC, datetime, timedelta
+import random
+from string import digits
 
 from fastapi import status
 from fastapi.testclient import TestClient
@@ -9,10 +11,15 @@ client = TestClient(app)
 now = datetime.now(UTC)
 now_str = now.strftime("%Y-%m-%dT%H:%M:%SZ")
 
+def n_len_rand(len_, floor=1):
+    top = 10**len_
+    if floor > top:
+        raise ValueError(f"Floor '{floor}' must be less than requested top '{top}'")
+    return f'{random.randrange(floor, top):0{len_}}'
 
 def test_create_batch_returns_created_batch():
     payload = {
-        "batch_code": "SCH-20251204-0001",
+        "batch_code": f'SCH-{n_len_rand(8)}-{n_len_rand(4)}',
         "received_at": now_str,
         "shelf_life_days": 7,
         "volume_liters": 1000.0,
@@ -43,7 +50,7 @@ def test_read_all_batches_returns_batches():
 
 def test_read_by_id_returns_batch():
     create_payload = {
-        "batch_code": "SCH-20251204-0002",
+        "batch_code": f'SCH-{n_len_rand(8)}-{n_len_rand(4)}',
         "received_at": now_str,
         "shelf_life_days": 7,
         "volume_liters": 500.0,
@@ -63,7 +70,7 @@ def test_read_by_id_returns_batch():
 
 def test_consume_batch_reduces_volume_and_returns_updated_batch():
     create_payload = {
-        "batch_code": "SCH-20251204-0002",
+        "batch_code": f'SCH-{n_len_rand(8)}-{n_len_rand(4)}',
         "received_at": now_str,
         "shelf_life_days": 7,
         "volume_liters": 500.0,
@@ -77,7 +84,7 @@ def test_consume_batch_reduces_volume_and_returns_updated_batch():
     batch_id = created_batch["id"]
     consume_payload = {
         "qty": 100.5,
-        "order_id": "ORDER-20251204-1234",
+        "order_id": f'ORDER-{n_len_rand(8)}-{n_len_rand(4)}',
     }
     client.post(f"/api/batches/{batch_id}/consume", json=consume_payload)
     response = client.get(f"/api/batches/{batch_id}")
@@ -94,7 +101,7 @@ def test_consume_batch_reduces_volume_and_returns_updated_batch():
 
 def test_near_expiry_returns_batches():
     create_payload = {
-        "batch_code": "SCH-20251204-0002",
+        "batch_code": f'SCH-{n_len_rand(8)}-{n_len_rand(4)}',
         "received_at": now_str,
         "shelf_life_days": 1,
         "volume_liters": 500.0,
@@ -122,7 +129,7 @@ def test_near_expiry_returns_batches():
 
 def test_delete_batch_soft_deletes_and_returns_204():
     create_payload = {
-        "batch_code": "SCH-20251204-0003",
+        "batch_code": f'SCH-{n_len_rand(8)}-{n_len_rand(4)}',
         "received_at": now_str,
         "shelf_life_days": 7,
         "volume_liters": 200.0,

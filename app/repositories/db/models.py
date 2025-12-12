@@ -1,5 +1,4 @@
 # app/db/models.py
-from datetime import timedelta
 
 from sqlalchemy import (
     Boolean,
@@ -9,9 +8,7 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     String,
-    func,
 )
-from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()

@@ -5,18 +5,19 @@ Revises: 3b3b7932d5a1
 Create Date: 2025-12-12 01:21:56.990707
 
 """
-from datetime import datetime, timedelta, timezone
-from typing import Sequence, Union
 
-from alembic import op
+from collections.abc import Sequence
+from datetime import UTC, datetime, timedelta
+
 import sqlalchemy as sa
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = '9da85c0c28d9'
-down_revision: Union[str, Sequence[str], None] = '3b3b7932d5a1'
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+revision: str = "9da85c0c28d9"
+down_revision: str | Sequence[str] | None = "3b3b7932d5a1"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
@@ -30,10 +31,10 @@ def upgrade() -> None:
         sa.column("fat_percent", sa.Float),
         sa.column("is_deleted", sa.Boolean),
         sa.column("version", sa.Integer),
-        sa.column("expiry", sa.DateTime(timezone=True))
+        sa.column("expiry", sa.DateTime(timezone=True)),
     )
 
-    now_utc = datetime.now(timezone.utc)
+    now_utc = datetime.now(UTC)
 
     op.bulk_insert(
         batches_table,
@@ -67,8 +68,6 @@ def upgrade() -> None:
 def downgrade() -> None:
     # remove seeded rows by batch_code (safe + reversible)
     op.execute(
-        sa.text(
-            "DELETE FROM batches WHERE batch_code IN (:b1, :b2)"
-        ),
+        sa.text("DELETE FROM batches WHERE batch_code IN (:b1, :b2)"),
         {"b1": "SCH-20251204-0001", "b2": "SCH-20251204-0002"},
     )

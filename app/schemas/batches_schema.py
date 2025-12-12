@@ -1,6 +1,12 @@
 from datetime import UTC, datetime, timedelta
 
-from pydantic import BaseModel, Field, PrivateAttr, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    Field,
+    PrivateAttr,
+    field_validator,
+    model_validator,
+)
 
 
 class Batch(BaseModel):
@@ -28,7 +34,7 @@ class Batch(BaseModel):
 
     _is_deleted: bool = PrivateAttr(default=False)
     _version: int = 1
-    _expiry: datetime = PrivateAttr() 
+    _expiry: datetime = PrivateAttr()
 
     @model_validator(mode="after")
     def compute_expiry(self):

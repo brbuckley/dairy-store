@@ -4,9 +4,9 @@ from datetime import datetime
 
 from sqlalchemy import func, select
 
-from app.db.models import Batch as BatchModel
-from app.db.session import SessionLocal
 from app.domain.batch_port import BatchPort, ConcurrencyError
+from app.repositories.db.models import Batch as BatchModel
+from app.repositories.db.session import SessionLocal
 from app.schemas.batches_schema import Batch as BatchSchema
 
 
@@ -29,9 +29,7 @@ def model_to_schema(model_batch: BatchModel) -> BatchSchema:
     object.__setattr__(
         schema, "_version", int(getattr(model_batch, "version", 0) or 0)
     )
-    object.__setattr__(
-        schema, "_expiry", model_batch.expiry
-    )
+    object.__setattr__(schema, "_expiry", model_batch.expiry)
 
     return schema
 
@@ -52,7 +50,7 @@ def schema_to_model(batch_schema: BatchSchema) -> BatchModel:
 class DBBatchRepository(BatchPort):
     """
     SQLAlchemy-backed repository implementing the BatchPort interface.
-    Uses SessionLocal from app.db.session.
+    Uses SessionLocal from app.repositories.db.session.
     """
 
     def __init__(self) -> None:
@@ -77,7 +75,9 @@ class DBBatchRepository(BatchPort):
                 old_batch = session.execute(stmt).scalars().one_or_none()
                 if old_batch.version > batch_schema._version:
                     raise ConcurrencyError()
-                new_batch = batch_schema.model_dump(exclude_unset=True, exclude_none=True)
+                new_batch = batch_schema.model_dump(
+                    exclude_unset=True, exclude_none=True
+                )
                 new_batch["version"] = batch_schema._version + 1
                 for field, value in new_batch.items():
                     setattr(old_batch, field, value)

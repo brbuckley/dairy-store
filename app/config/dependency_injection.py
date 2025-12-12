@@ -1,4 +1,3 @@
-# app/config/dependency_injection.py
 from functools import lru_cache
 from typing import Annotated
 
@@ -11,6 +10,7 @@ from app.domain.batch_service import BatchService
 from app.domain.record_port import RecordPort
 from app.repositories.batch_repository import BatchRepository
 from app.repositories.db_batch_repo import DBBatchRepository
+from app.repositories.db_record_repo import DBRecordRepository
 from app.repositories.record_repository import RecordRepository
 
 
@@ -37,6 +37,8 @@ def get_record_repo_singleton() -> RecordPort:
     settings = get_settings_cached()
     if settings.env == "dev":
         return RecordRepository()
+    if settings.env == "db":
+        return DBRecordRepository()
     return RecordRepository()
 
 
